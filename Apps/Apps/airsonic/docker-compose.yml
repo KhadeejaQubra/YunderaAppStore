@@ -11,7 +11,11 @@ services:
       PUID: $PUID
       PGID: $PGID
       TZ: $TZ
-      JAVA_OPTS: "-Dserver.port=80 -Dserver.use-forward-headers=true"    
+      JAVA_OPTS:
+        -Dserver.port=80
+        -Dserver.use-forward-headers=true
+        -Dserver.forward-headers-strategy=native
+    
     volumes:
       - /DATA/AppData/airsonic/config/:/config
       - /DATA/AppData/airsonic/data/:/data
