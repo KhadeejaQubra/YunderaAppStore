@@ -1,0 +1,41 @@
+name: audiobookshelf
+
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    restart: unless-stopped
+    ports:
+      - "13378:80"
+    environment:
+      - TZ=Etc/UTC
+    volumes:
+      - /DATA/AppData/audiobookshelf/config:/config
+      - /DATA/AppData/audiobookshelf/metadata:/metadata
+      - /DATA/Media/Audiobooks:/audiobooks
+      - /DATA/Media/Podcasts:/podcasts
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: audiobookshelf
+  webui_port: 13378
+  store_app_id: audiobookshelf
+  title:
+    en_us: Audiobookshelf
+  port_map: "13378"
+  tagline:
+    en_us: Self hosted audiobooks and podcasts
+  description:
+    en_us: |
+      Stream your personal audiobooks and podcasts on any device. Easy library management, chapters, metadata, users, and backups. Perfect fit for Yundera PCS.
+  developer: advplyr
+  category: Media
+  tips:
+    before_install:
+      en_us: |
+        Create these folders first if they do not exist.
+        /DATA/Media/Audiobooks
+        /DATA/Media/Podcasts
+        You can change the paths in the compose if your media lives elsewhere.
