@@ -1,41 +1,122 @@
 name: audiobookshelf
-
 services:
   audiobookshelf:
-    image: ghcr.io/advplyr/audiobookshelf:latest
-    container_name: audiobookshelf
-    restart: unless-stopped
-    ports:
-      - "13378:80"
+    depends_on:
+      audiobookshelf-init:
+        condition: service_started
+        required: true
     environment:
+      - HOST=0.0.0.0
+      - ROUTER_BASE_PATH=/audiobookshelf
       - TZ=Etc/UTC
+    expose:
+      - "80"
+    hostname: ""
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    restart: unless-stopped
+    user: 1000:1000
     volumes:
-      - /DATA/AppData/audiobookshelf/config:/config
-      - /DATA/AppData/audiobookshelf/metadata:/metadata
-      - /DATA/Media/Audiobooks:/audiobooks
-      - /DATA/Media/Podcasts:/podcasts
-
+      - type: bind
+        source: /DATA/AppData/audiobookshelf/config
+        target: /config
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /DATA/AppData/audiobookshelf/metadata
+        target: /metadata
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /DATA/Media/Audiobooks
+        target: /audiobooks
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /DATA/Media/Podcasts
+        target: /podcasts
+        bind:
+          create_host_path: true
+    ports: []
+    devices: []
+    cap_add: []
+    command: []
+    networks:
+      - pcs
+    privileged: false
+    container_name: ""
+    cpu_shares: 90
+    deploy:
+      resources:
+        limits:
+          memory: 3966M
+  audiobookshelf-init:
+    command:
+      - sh
+      - -c
+      - " mkdir -p /DATA/AppData/audiobookshelf/config && mkdir -p
+        /DATA/AppData/audiobookshelf/metadata && mkdir -p /DATA/Media/Audiobooks
+        && mkdir -p /DATA/Media/Podcasts && chown -R 1000:1000
+        /DATA/AppData/audiobookshelf /DATA/Media/Audiobooks /DATA/Media/Podcasts
+        && chmod -R 755 /DATA/AppData/audiobookshelf /DATA/Media/Audiobooks
+        /DATA/Media/Podcasts && echo 'Directories created successfully' "
+    environment:
+      - AUTH_HASH=e87c998dc923c7d8f5c7839229951959f22abd58ee2596ca1590f840eaba43f7
+    image: busybox:latest
+    restart: unless-stopped
+    user: root
+    volumes:
+      - type: bind
+        source: /DATA
+        target: /DATA
+        bind:
+          create_host_path: true
+    ports: []
+    devices: []
+    cap_add: []
+    networks:
+      - pcs
+    privileged: false
+    container_name: ""
+    hostname: ""
+    cpu_shares: 90
+    deploy:
+      resources:
+        limits:
+          memory: 3966M
+networks:
+  pcs:
+    name: pcs
+    external: true
 x-casaos:
   architectures:
     - amd64
     - arm64
+  category: Media
+  description:
+    en_us: >
+      Stream your personal audiobooks and podcasts on any device. Easy library
+      management, chapters, metadata, users, and backups. Perfect fit for
+      Yundera PCS.
+  developer: advplyr
+  hostname: 80-audiobookshelf-yunderalabs.nsl.sh
+  index: /audiobookshelf/
+  is_uncontrolled: false
   main: audiobookshelf
-  webui_port: 13378
+  port_map: "443"
+  scheme: https
   store_app_id: audiobookshelf
-  title:
-    en_us: Audiobookshelf
-  port_map: "13378"
   tagline:
     en_us: Self hosted audiobooks and podcasts
-  description:
-    en_us: |
-      Stream your personal audiobooks and podcasts on any device. Easy library management, chapters, metadata, users, and backups. Perfect fit for Yundera PCS.
-  developer: advplyr
-  category: Media
   tips:
     before_install:
       en_us: |
-        Create these folders first if they do not exist.
+        Directories will be created automatically on first run.
+        Media folders:
         /DATA/Media/Audiobooks
         /DATA/Media/Podcasts
         You can change the paths in the compose if your media lives elsewhere.
+  title:
+    en_us: Audiobookshelf
+    custom: ""
+  author: self
+  icon: ""
